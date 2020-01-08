@@ -1,0 +1,23 @@
+{
+  "name": "twitter-bots-2",
+  "version": "1.0.0",
+  "description": "create a config file as such :",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/edmondlafay/twitter-bots-2.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/edmondlafay/twitter-bots-2/issues"
+  },
+  "homepage": "https://github.com/edmondlafay/twitter-bots-2#readme",
+  "dependencies": {
+    "async": "^3.1.0",
+    "twitter": "^1.7.1"
+  }
+}
