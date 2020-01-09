@@ -3,8 +3,12 @@ var async = require('async');
 var config = require('./config.js');
 var T = new Twitter(config);
 
-TWEET_TEXT = ['Need !', 'Excellent !', 'Gogogo !', 'Wowowow !', 'Nice !', 'Cool !', 'Superbe !!', 'OMG !'];
-LIMIT_COUNT = {likes: 0, follows: 0};
+const TWEET_TEXT = [
+  'Need!', 'Excellent!', 'Gooo!', 'Wow!', 'Nice!', 'Cool!',
+  'Super!', 'OMG!', 'Yeah!', 'Top!', 'GG!', 'Must!'
+];
+let LIMIT_COUNT = {likes: 0, follows: 0};
+let TWEETS_FOUND = [];
 
 // Set up your search parameters
 var params = {
@@ -71,8 +75,9 @@ function handleTweet(tweetId, username, followingAuthor, alreadyDone, mentions, 
         return callback(null, '');
       }
       T.post('statuses/update', {
-        status: `${TWEET_TEXT[Math.floor(Math.random()*TWEET_TEXT.length)]} @realDonaldTrump @year_progress @TayTweets ${hashtags.join( )}`,
-        attachment_url: `https://twitter.com/${username}/status/${tweetId}`
+        status: `@${username} ${TWEET_TEXT[Math.floor(Math.random()*TWEET_TEXT.length)]} @realDonaldTrump @year_progress @TayTweets ${hashtags.join( )}`,
+        attachment_url: `https://twitter.com/${username}/status/${tweetId}`,
+        in_reply_to_status_id: tweetId
       }, function(err){
         if(err) {
           callback(new Error(`https://twitter.com/${username}/status/${tweetId} tweet error :` + err[0].message));
@@ -122,27 +127,49 @@ function parseTweet(tweet) {
   for (const hashtag of tweet.entities.hashtags) {
     hashtags.push(`#${hashtag.text}`);
   }
-  handleTweet(tweetId, username, followingAuthor, alreadyDone, mentions.slice(), hashtags.slice());
+  if (followingAuthor && alreadyDone) {
+    return false;
+  } else {
+    handleTweet(tweetId, username, followingAuthor, alreadyDone, mentions.slice(), hashtags.slice());
+    return true;
+  }
+}
+
+async function nextTweetFound(i) {
+  // Get the tweet Id from the returned data
+  if (TWEETS_FOUND[i].retweeted_status) {
+    const id = TWEETS_FOUND[i].retweeted_status.id_str
+    T.get('statuses/show', {id: id}, async (err, data) => {
+      if(!err) {
+        if (parseTweet(data)) {
+          await sleep(10000);
+        }
+        i+=1;
+        if (i < TWEETS_FOUND.length && LIMIT_COUNT['likes']<=10 && LIMIT_COUNT['follows']<=10) {
+          nextTweetFound(i);
+        }
+      } else {
+        console.log(id + ' get tweet error :', err);
+      }
+    });
+  } else {
+    if (parseTweet(TWEETS_FOUND[i])) {
+      await sleep(10000);
+    }
+    i+=1;
+    if (i < TWEETS_FOUND.length && LIMIT_COUNT['likes']<=10 && LIMIT_COUNT['follows']<=10) {
+      nextTweetFound(i);
+    }
+  }
 }
 
 // Initiate your search using the above parameters
 T.get('search/tweets', params, async (err, data) => {
   if(!err) {
-    for(let i = 0; i < data.statuses.length && LIMIT_COUNT['likes']<=10 && LIMIT_COUNT['follows']<=10; i++){
-      // Get the tweet Id from the returned data
-      if (data.statuses[i].retweeted_status) {
-        const id = data.statuses[i].retweeted_status.id_str
-        T.get('statuses/show', {id: id}, async (err, data) => {
-          if(!err) {
-            parseTweet(data);
-          } else {
-            console.log(id + ' get tweet error :', err);
-          }
-        });
-      } else {
-        parseTweet(data.statuses[i]);
-      }
-      await sleep(10000);
+    TWEETS_FOUND = data.statuses
+    let i = 0
+    if (i < TWEETS_FOUND.length && LIMIT_COUNT['likes']<=10 && LIMIT_COUNT['follows']<=10) {
+      nextTweetFound(i)
     }
   } else {
     console.log('get all tweets error :', err);
