@@ -8,8 +8,8 @@ LIMIT_COUNT = {likes: 0, follows: 0};
 
 // Set up your search parameters
 var params = {
-  q: '"follow" "RT" "concours" filter:links -fortnite -skin -bucks',
-  count: 50,
+  q: '"follow" "RT" "concours" filter:links -fortnite -skin -vbucks -instagram',
+  count: 100,
   result_type: 'recent',
   lang: 'fr'
 };
@@ -131,11 +131,12 @@ T.get('search/tweets', params, async (err, data) => {
     for(let i = 0; i < data.statuses.length && LIMIT_COUNT['likes']<=10 && LIMIT_COUNT['follows']<=10; i++){
       // Get the tweet Id from the returned data
       if (data.statuses[i].retweeted_status) {
-        T.get('statuses/show', {id: data.statuses[i].retweeted_status.id_str}, async (err, data) => {
+        const id = data.statuses[i].retweeted_status.id_str
+        T.get('statuses/show', {id: id}, async (err, data) => {
           if(!err) {
             parseTweet(data);
           } else {
-            console.log(data.statuses[i].retweeted_status.id_str + ' get tweet error :', err);
+            console.log(id + ' get tweet error :', err);
           }
         });
       } else {
