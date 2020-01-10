@@ -3,10 +3,6 @@ var async = require('async');
 var config = require('./config.js');
 var T = new Twitter(config);
 
-const TWEET_TEXT = [
-  'Need!', 'Excellent!', 'Gooo!', 'Wow!', 'Nice!', 'Cool!',
-  'Super!', 'OMG!', 'Yeah!', 'Top!', 'GG!', 'Must!'
-];
 let LIMIT_COUNT = {likes: 0, follows: 0};
 let TWEETS_FOUND = [];
 
@@ -75,7 +71,7 @@ function handleTweet(tweetId, username, followingAuthor, alreadyDone, mentions, 
         return callback(null, '');
       }
       T.post('statuses/update', {
-        status: `@${username} ${TWEET_TEXT[Math.floor(Math.random()*TWEET_TEXT.length)]} @realDonaldTrump @year_progress @TayTweets ${hashtags.join( )}`,
+        status: `@${username} @year_progress @TayTweets ${hashtags.join( )}`,
         attachment_url: `https://twitter.com/${username}/status/${tweetId}`,
         in_reply_to_status_id: tweetId
       }, function(err){
