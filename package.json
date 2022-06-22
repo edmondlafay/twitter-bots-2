@@ -17,7 +17,7 @@
   },
   "homepage": "https://github.com/edmondlafay/twitter-bots-2#readme",
   "dependencies": {
-    "async": "^3.1.0",
+    "async": "^3.2.2",
     "twitter": "^1.7.1"
   }
 }
